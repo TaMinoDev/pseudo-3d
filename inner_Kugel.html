@@ -1,0 +1,113 @@
+
+    <html>
+      <head><title>projekt</title><style></style></head>
+      <body><!DOCTYPE html>
+<html>
+<body style="margin:0; background:#000; overflow:hidden;">
+    <canvas id="netCanvas"></canvas>
+<script>
+const canvas = document.getElementById('netCanvas');
+const ctx = canvas.getContext('2d');
+let width, height, points = [];
+let rotX = 0, rotY = 0;
+
+const numPoints = 200; // Weniger Punkte für bessere Performance bei Linien
+const radius = 600;    
+const connectionDist = 300; // Max. Distanz für eine Verbindung
+
+// 1. Punkte generieren (Fibonacci)
+for (let i = 0; i < numPoints; i++) {
+    const phi = Math.acos(1 - 2 * (i + 0.5) / numPoints);
+    const theta = Math.PI * (1 + Math.sqrt(5)) * (i + 0.5);
+    points.push({
+        x: Math.cos(theta) * Math.sin(phi) * radius,
+        y: Math.sin(theta) * Math.sin(phi) * radius,
+        z: Math.cos(phi) * radius
+    });
+}
+
+function resize() {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+}
+window.onresize = resize;
+resize();
+
+window.addEventListener('mousemove', (e) => {
+    rotY = (e.clientX - width / 2) * 0.003;
+    rotX = (e.clientY - height / 2) * 0.003;
+});
+
+function draw() {
+    ctx.fillStyle = 'black';
+    ctx.fillRect(0, 0, width, height);
+
+    // 3D-Transformation der Punkte
+    const projected = points.map(p => {
+        let cosY = Math.cos(rotY), sinY = Math.sin(rotY);
+        let x1 = p.x * cosY - p.z * sinY;
+        let z1 = p.x * sinY + p.z * cosY;
+        let cosX = Math.cos(rotX), sinX = Math.sin(rotX);
+        let y2 = p.y * cosX - z1 * sinX;
+        let z2 = p.y * sinX + z1 * cosX;
+
+        const fov = 500;
+        const scale = fov / (fov + z2);
+        return {
+            x: x1 * scale + width / 2,
+            y: y2 * scale + height / 2,
+            z: z2,
+            scale: scale
+        };
+    });
+
+    // Linien zeichnen (Nachbarschafts-Check)
+    ctx.lineWidth = 0.5;
+    for (let i = 0; i < projected.length; i++) {
+        for (let j = i + 1; j < projected.length; j++) {
+            const p1 = points[i];
+            const p2 = points[j];
+            
+            // Berechne Distanz im 3D-Raum (Original-Koordinaten)
+            const dx = p1.x - p2.x;
+            const dy = p1.y - p2.y;
+            const dz = p1.z - p2.z;
+            const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+
+            if (dist < connectionDist) {
+                const pr1 = projected[i];
+                const pr2 = projected[j];
+                
+                if (pr1.z > -400 && pr2.z > -400) {
+                    // Farbe basierend auf Tiefe
+                    const alpha = (1 - (pr1.z + radius) / (radius * 2)) * 0.5;
+                    ctx.strokeStyle = `rgba(0, 255, 200, ${alpha})`;
+                    ctx.beginPath();
+                    ctx.moveTo(pr1.x, pr1.y);
+                    ctx.lineTo(pr2.x, pr2.y);
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    // Punkte zeichnen
+    projected.forEach(p => {
+        if (p.z > -400) {
+            const size = 2 * p.scale;
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, size, 0, 7);
+            ctx.fill();
+        }
+    });
+
+    requestAnimationFrame(draw);
+}
+draw();
+</script>
+</body>
+</html>
+<script></script></body>
+    </html>
+  

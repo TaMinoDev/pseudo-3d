@@ -1,0 +1,93 @@
+
+    <html>
+      <head><title>Sterne</title><style></style></head>
+      <body><!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>3D DNA Helix</title>
+    <style>
+        body { margin: 0; background: #050505; overflow: hidden; color: #0ff; font-family: sans-serif; }
+        canvas { display: block; cursor: move; }
+        .ui { position: absolute; top: 20px; left: 20px; pointer-events: none; opacity: 0.7; }
+    </style>
+</head>
+<body>
+    <div class="ui"><b>Helix-Modell:</b> Maus ziehen zum Rotieren | Scrollen für Zoom</div>
+    <canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let width, height, points = [];
+let zoom = 400, rotX = 0, rotY = 0, isDragging = false, lastX, lastY;
+
+function initPoints() {
+    points = [];
+    const steps = 150; // Anzahl der Ebenen
+    for (let i = 0; i < steps; i++) {
+        const y = (i - steps / 2) * 10;
+        const angle = i * 0.2;
+        const radius = 120;
+        // Strang 1
+        points.push({ x: Math.cos(angle) * radius, y: y, z: Math.sin(angle) * radius, color: "#00d4ff" });
+        // Strang 2 (180 Grad versetzt)
+        points.push({ x: Math.cos(angle + Math.PI) * radius, y: y, z: Math.sin(angle + Math.PI) * radius, color: "#ff00ee" });
+        // Verbindungsbrücken alle 10 Punkte
+        if (i % 8 === 0) {
+            for (let j = -radius; j < radius; j += 15) {
+                points.push({ x: Math.cos(angle) * j, y: y, z: Math.sin(angle) * j, color: "rgba(255,255,255,0.3)" });
+            }
+        }
+    }
+}
+
+function rotate(p, ax, ay) {
+    let x = p.x * Math.cos(ay) - p.z * Math.sin(ay);
+    let z = p.x * Math.sin(ay) + p.z * Math.cos(ay);
+    let y = p.y * Math.cos(ax) - z * Math.sin(ax);
+    z = p.y * Math.sin(ax) + z * Math.cos(ax);
+    return {x, y, z, color: p.color};
+}
+
+function draw() {
+    ctx.fillStyle = "#050505";
+    ctx.fillRect(0, 0, width, height);
+    const centerX = width / 2, centerY = height / 2;
+
+    points.forEach(p => {
+        let transformed = rotate(p, rotX, rotY);
+        let viewZ = transformed.z + 1000; 
+        if (viewZ > 10) {
+            const scale = zoom / viewZ;
+            const x2d = transformed.x * scale + centerX;
+            const y2d = transformed.y * scale + centerY;
+            ctx.beginPath();
+            ctx.arc(x2d, y2d, Math.max(0.5, 4 * scale), 0, Math.PI * 2);
+            ctx.fillStyle = transformed.color;
+            ctx.fill();
+        }
+    });
+    requestAnimationFrame(draw);
+}
+
+window.addEventListener('mousedown', e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+    if (isDragging) {
+        rotY += (e.clientX - lastX) * 0.01;
+        rotX += (e.clientY - lastY) * 0.01;
+        lastX = e.clientX; lastY = e.clientY;
+    }
+});
+window.addEventListener('wheel', e => { zoom -= e.deltaY; e.preventDefault(); }, { passive: false });
+window.addEventListener('resize', () => { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; });
+window.dispatchEvent(new Event('resize'));
+initPoints();
+draw();
+</script>
+</body>
+</html>
+<script></script></body>
+    </html>
+  

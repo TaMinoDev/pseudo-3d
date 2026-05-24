@@ -1,0 +1,107 @@
+
+    <html>
+      <head><title>Sterne</title><style></style></head>
+      <body><!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>4D Tesseract 2025</title>
+    <style>
+        body { margin: 0; background: #000; overflow: hidden; color: #0f0; font-family: monospace; }
+        canvas { display: block; cursor: move; }
+        .ui { position: absolute; top: 20px; width: 100%; text-align: center; pointer-events: none; opacity: 0.6; }
+    </style>
+</head>
+<body>
+    <div class="ui">4D HYPERCUBE PROJEKTION • ROTATION IN W-ACHSE</div>
+    <canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let width, height;
+let points = [];
+let angle = 0;
+
+// Die 16 Eckpunkte eines 4D-Hypercubes
+function initPoints() {
+    points = [];
+    for (let i = 0; i < 16; i++) {
+        points.push({
+            x: i & 1 ? 1 : -1,
+            y: i & 2 ? 1 : -1,
+            z: i & 4 ? 1 : -1,
+            w: i & 8 ? 1 : -1
+        });
+    }
+}
+
+function rotate4D(p, a) {
+    // Rotation in der XY-Ebene
+    let x = p.x * Math.cos(a) - p.y * Math.sin(a);
+    let y = p.x * Math.sin(a) + p.y * Math.cos(a);
+    // Rotation in der ZW-Ebene (die 4. Dimension!)
+    let z = p.z * Math.cos(a * 0.8) - p.w * Math.sin(a * 0.8);
+    let w = p.z * Math.sin(a * 0.8) + p.w * Math.cos(a * 0.8);
+    return {x, y, z, w};
+}
+
+function draw() {
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, width, height);
+    angle += 0.02;
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    // Projiziere 4D -> 3D -> 2D
+    let projected = points.map(p => {
+        let p4 = rotate4D(p, angle);
+        // Perspektive von 4D auf 3D
+        let distance4D = 2;
+        let wScale = 1 / (distance4D - p4.w);
+        let x3 = p4.x * wScale;
+        let y3 = p4.y * wScale;
+        let z3 = p4.z * wScale;
+
+        // Perspektive von 3D auf 2D
+        let distance3D = 2;
+        let zScale = 1 / (distance3D - z3);
+        return {
+            x: x3 * zScale * 400 + centerX,
+            y: y3 * zScale * 400 + centerY
+        };
+    });
+
+    // Zeichne die Kanten (Verbindungen)
+    ctx.strokeStyle = "#00ffcc";
+    ctx.lineWidth = 1.5;
+    for (let i = 0; i < 16; i++) {
+        for (let j = i + 1; j < 16; j++) {
+            // Prüfe mathematisch, ob die Punkte Nachbarn sind (nur 1 Bit Differenz)
+            let diff = i ^ j;
+            if (diff === 1 || diff === 2 || diff === 4 || diff === 8) {
+                ctx.beginPath();
+                ctx.moveTo(projected[i].x, projected[i].y);
+                ctx.lineTo(projected[j].x, projected[j].y);
+                ctx.stroke();
+            }
+        }
+    }
+    requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+});
+
+window.dispatchEvent(new Event('resize'));
+initPoints();
+draw();
+</script>
+</body>
+</html>
+<script></script></body>
+    </html>
+  

@@ -1,0 +1,117 @@
+
+    <html>
+      <head><title>Sterne</title><style></style></head>
+      <body><!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>Quantum Wave 2025</title>
+    <style>
+        body { margin: 0; background: radial-gradient(circle, #000814 0%, #000000 100%); overflow: hidden; color: #4cc9f0; font-family: 'Segoe UI', sans-serif; }
+        canvas { display: block; cursor: crosshair; }
+        .ui { position: absolute; bottom: 30px; width: 100%; text-align: center; pointer-events: none; opacity: 0.5; letter-spacing: 2px; font-size: 12px; }
+    </style>
+</head>
+<body>
+    <div class="ui">INTERAKTIVES QUANTENFELD • ZIEHEN ZUM ROTIEREN</div>
+    <canvas id="canvas"></canvas>
+
+<script>
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let width, height, points = [];
+let rotX = 0.5, rotY = 0.5, zoom = 500;
+let isDragging = false, lastX, lastY;
+let time = 0;
+
+// Erzeugt ein flaches Gitter, das wir später im 3D-Raum verbiegen
+function initPoints() {
+    points = [];
+    const size = 35; // 35x35 Punkte Feld
+    const spacing = 40;
+    for (let x = 0; x < size; x++) {
+        for (let z = 0; z < size; z++) {
+            points.push({
+                origX: (x - size/2) * spacing,
+                origZ: (z - size/2) * spacing,
+                baseY: 0
+            });
+        }
+    }
+}
+
+function rotate(x, y, z, ax, ay) {
+    // Y-Rotation
+    let nx = x * Math.cos(ay) - z * Math.sin(ay);
+    let nz = x * Math.sin(ay) + z * Math.cos(ay);
+    // X-Rotation
+    let ny = y * Math.cos(ax) - nz * Math.sin(ax);
+    nz = y * Math.sin(ax) + nz * Math.cos(ax);
+    return {x: nx, y: ny, z: nz};
+}
+
+function draw() {
+    // Leichtes Trail-Feedback für flüssigere Optik
+    ctx.fillStyle = "rgba(0, 5, 15, 0.15)";
+    ctx.fillRect(0, 0, width, height);
+    
+    time += 0.03; // Geschwindigkeit der Wellenbewegung
+    const centerX = width / 2;
+    const centerY = height / 2;
+
+    points.forEach((p, i) => {
+        // Die Magie: Die Höhe (y) berechnet sich aus der Distanz zur Mitte + Zeit
+        const dist = Math.sqrt(p.origX**2 + p.origZ**2);
+        const waveY = Math.sin(dist * 0.01 - time) * 80; // Wellenhöhe
+        
+        let transformed = rotate(p.origX, waveY, p.origZ, rotX, rotY);
+        let viewZ = transformed.z + 800;
+
+        if (viewZ > 10) {
+            const scale = zoom / viewZ;
+            const x2d = transformed.x * scale + centerX;
+            const y2d = transformed.y * scale + centerY;
+
+            // Farbe ändert sich basierend auf der Höhe der Welle
+            const hue = 180 + (waveY * 0.5); 
+            const brightness = Math.min(100, 40 + scale * 10);
+            
+            ctx.beginPath();
+            ctx.arc(x2d, y2d, Math.max(0.2, 2.5 * scale), 0, Math.PI * 2);
+            ctx.fillStyle = `hsla(${hue}, 80%, ${brightness}%, ${Math.min(1, scale * 2)})`;
+            ctx.fill();
+        }
+    });
+
+    requestAnimationFrame(draw);
+}
+
+// Interaktion
+window.addEventListener('mousedown', e => { isDragging = true; lastX = e.clientX; lastY = e.clientY; });
+window.addEventListener('mouseup', () => isDragging = false);
+window.addEventListener('mousemove', e => {
+    if (isDragging) {
+        rotY += (e.clientX - lastX) * 0.005;
+        rotX += (e.clientY - lastY) * 0.005;
+        lastX = e.clientX; lastY = e.clientY;
+    }
+});
+window.addEventListener('wheel', e => {
+    zoom -= e.deltaY * 0.5;
+    e.preventDefault();
+}, { passive: false });
+
+window.addEventListener('resize', () => {
+    width = canvas.width = window.innerWidth;
+    height = canvas.height = window.innerHeight;
+});
+
+window.dispatchEvent(new Event('resize'));
+initPoints();
+draw();
+</script>
+</body>
+</html>
+<script></script></body>
+    </html>
+  
