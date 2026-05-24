@@ -1,11 +1,8 @@
-
-    <html>
-      <head><title>Sterne</title><style></style></head>
-      <body><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <title>Quantum Wave 2025</title>
+    <title>Quantum Field?!</title>
     <style>
         body { margin: 0; background: radial-gradient(circle, #000814 0%, #000000 100%); overflow: hidden; color: #4cc9f0; font-family: 'Segoe UI', sans-serif; }
         canvas { display: block; cursor: crosshair; }
@@ -13,7 +10,7 @@
     </style>
 </head>
 <body>
-    <div class="ui">INTERAKTIVES QUANTENFELD • ZIEHEN ZUM ROTIEREN</div>
+    <div class="ui">Drag to Rotate</div>
     <canvas id="canvas"></canvas>
 
 <script>
@@ -24,7 +21,7 @@ let rotX = 0.5, rotY = 0.5, zoom = 500;
 let isDragging = false, lastX, lastY;
 let time = 0;
 
-// Erzeugt ein flaches Gitter, das wir später im 3D-Raum verbiegen
+// Generate a flat grid that we will later bend in the 3th Dimension
 function initPoints() {
     points = [];
     const size = 35; // 35x35 Punkte Feld
@@ -51,16 +48,14 @@ function rotate(x, y, z, ax, ay) {
 }
 
 function draw() {
-    // Leichtes Trail-Feedback für flüssigere Optik
     ctx.fillStyle = "rgba(0, 5, 15, 0.15)";
     ctx.fillRect(0, 0, width, height);
     
-    time += 0.03; // Geschwindigkeit der Wellenbewegung
+    time += 0.03;
     const centerX = width / 2;
     const centerY = height / 2;
 
     points.forEach((p, i) => {
-        // Die Magie: Die Höhe (y) berechnet sich aus der Distanz zur Mitte + Zeit
         const dist = Math.sqrt(p.origX**2 + p.origZ**2);
         const waveY = Math.sin(dist * 0.01 - time) * 80; // Wellenhöhe
         
@@ -72,7 +67,7 @@ function draw() {
             const x2d = transformed.x * scale + centerX;
             const y2d = transformed.y * scale + centerY;
 
-            // Farbe ändert sich basierend auf der Höhe der Welle
+            // clor based on the height of the points
             const hue = 180 + (waveY * 0.5); 
             const brightness = Math.min(100, 40 + scale * 10);
             
@@ -112,6 +107,4 @@ draw();
 </script>
 </body>
 </html>
-<script></script></body>
-    </html>
   
