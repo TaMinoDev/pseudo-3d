@@ -1,7 +1,4 @@
-
-    <html>
-      <head><title>projekt</title><style></style></head>
-      <body><!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <body style="margin:0; background:#000; overflow:hidden;">
     <canvas id="netCanvas"></canvas>
@@ -11,11 +8,11 @@ const ctx = canvas.getContext('2d');
 let width, height, points = [];
 let rotX = 0, rotY = 0;
 
-const numPoints = 200; // Weniger Punkte für bessere Performance bei Linien
+const numPoints = 200; // Less more point for better performence
 const radius = 600;    
-const connectionDist = 300; // Max. Distanz für eine Verbindung
+const connectionDist = 300; // max. distanze for lines
 
-// 1. Punkte generieren (Fibonacci)
+// 1. generating points
 for (let i = 0; i < numPoints; i++) {
     const phi = Math.acos(1 - 2 * (i + 0.5) / numPoints);
     const theta = Math.PI * (1 + Math.sqrt(5)) * (i + 0.5);
@@ -42,7 +39,7 @@ function draw() {
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, width, height);
 
-    // 3D-Transformation der Punkte
+    // 3D-Transformation of the points
     const projected = points.map(p => {
         let cosY = Math.cos(rotY), sinY = Math.sin(rotY);
         let x1 = p.x * cosY - p.z * sinY;
@@ -68,7 +65,7 @@ function draw() {
             const p1 = points[i];
             const p2 = points[j];
             
-            // Berechne Distanz im 3D-Raum (Original-Koordinaten)
+            // Calculating distance in 3D
             const dx = p1.x - p2.x;
             const dy = p1.y - p2.y;
             const dz = p1.z - p2.z;
@@ -79,7 +76,7 @@ function draw() {
                 const pr2 = projected[j];
                 
                 if (pr1.z > -400 && pr2.z > -400) {
-                    // Farbe basierend auf Tiefe
+                    // Color based on the deepth
                     const alpha = (1 - (pr1.z + radius) / (radius * 2)) * 0.5;
                     ctx.strokeStyle = `rgba(0, 255, 200, ${alpha})`;
                     ctx.beginPath();
@@ -91,7 +88,7 @@ function draw() {
         }
     }
 
-    // Punkte zeichnen
+    // Drawing Points
     projected.forEach(p => {
         if (p.z > -400) {
             const size = 2 * p.scale;
@@ -108,6 +105,4 @@ draw();
 </script>
 </body>
 </html>
-<script></script></body>
-    </html>
   
